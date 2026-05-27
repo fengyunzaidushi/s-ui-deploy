@@ -23,6 +23,7 @@ The script creates:
 /opt/s-ui/db
 /opt/s-ui/cert
 /opt/s-ui/docker-compose.yml
+/usr/local/bin/s-ui
 ```
 
 Then it runs:
@@ -37,6 +38,18 @@ docker compose up -d
 Panel: http://SERVER_IP:2095/app/
 Subscription: http://SERVER_IP:2096/sub/
 Default account: admin / admin
+```
+
+## Helper Command
+
+After deployment, use the host command:
+
+```bash
+s-ui status
+s-ui logs
+s-ui restart
+s-ui admin -show
+s-ui setting -show
 ```
 
 ## Optional Environment Variables

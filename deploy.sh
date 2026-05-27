@@ -4,6 +4,7 @@ set -euo pipefail
 APP_DIR="${APP_DIR:-/opt/s-ui}"
 IMAGE="${IMAGE:-ghcr.io/admin8800/s-ui}"
 CONTAINER_NAME="${CONTAINER_NAME:-s-ui}"
+COMMAND_PATH="${COMMAND_PATH:-/usr/local/bin/s-ui}"
 
 if [ "$(id -u)" -ne 0 ]; then
   echo "This script needs root privileges. Re-running with sudo..."
@@ -41,9 +42,71 @@ cd "$APP_DIR"
 docker compose pull
 docker compose up -d
 
+cat > "$COMMAND_PATH" <<EOF
+#!/usr/bin/env bash
+set -euo pipefail
+
+APP_DIR="$APP_DIR"
+CONTAINER_NAME="$CONTAINER_NAME"
+
+usage() {
+  cat <<'USAGE'
+S-UI Docker helper
+
+Usage:
+  s-ui admin [options]       Manage first admin credentials
+  s-ui setting [options]     Manage panel/subscription settings
+  s-ui uri                   Show panel URI
+  s-ui migrate               Run database migration
+  s-ui status                Show container status
+  s-ui logs                  Follow container logs
+  s-ui restart               Restart container
+  s-ui start                 Start container
+  s-ui stop                  Stop container
+
+Examples:
+  s-ui admin -show
+  s-ui admin -username admin -password new-password
+  s-ui setting -show
+USAGE
+}
+
+if [ "\${1:-}" = "" ]; then
+  usage
+  exit 0
+fi
+
+case "\$1" in
+  status)
+    cd "\$APP_DIR"
+    docker compose ps
+    ;;
+  logs)
+    docker logs -f "\$CONTAINER_NAME"
+    ;;
+  restart|start|stop)
+    cd "\$APP_DIR"
+    docker compose "\$1" s-ui
+    ;;
+  admin|setting|uri|migrate)
+    if [ -t 0 ]; then
+      docker exec -it "\$CONTAINER_NAME" ./sui "\$@"
+    else
+      docker exec "\$CONTAINER_NAME" ./sui "\$@"
+    fi
+    ;;
+  *)
+    usage
+    exit 1
+    ;;
+esac
+EOF
+chmod +x "$COMMAND_PATH"
+
 echo
 echo "S-UI has been deployed."
 echo "Compose file: $APP_DIR/docker-compose.yml"
+echo "Command: $COMMAND_PATH"
 echo "Panel: http://SERVER_IP:2095/app/"
 echo "Subscription: http://SERVER_IP:2096/sub/"
 echo "Default account: admin / admin"

@@ -4,6 +4,14 @@ One-command Docker deployment for S-UI.
 
 ## Deploy
 
+Run this on the server:
+
+```bash
+bash <(curl -fsSL https://raw.githubusercontent.com/fengyunzaidushi/s-ui-deploy/main/deploy.sh)
+```
+
+Or run from a cloned repository:
+
 ```bash
 bash deploy.sh
 ```

@@ -3,10 +3,18 @@ services:
     image: ghcr.io/admin8800/s-ui
     container_name: s-ui
     hostname: s-ui
-    network_mode: host
+    networks:
+      - proxy
+    ports:
+      - "31460:31460/tcp"
+      - "31460:31460/udp"
     volumes:
       - ./db:/app/db
       - ./cert:/app/cert
     tty: true
     restart: unless-stopped
     entrypoint: ./entrypoint.sh
+
+networks:
+  proxy:
+    external: true

@@ -3,15 +3,15 @@
 }
 
 accpilot.online, www.accpilot.online {
-	reverse_proxy 127.0.0.1:8080
+	reverse_proxy acg-faka-nginx:80
 }
 
 aa.sub2api.online {
 	redir / /app/ 302
 
 	@panel path /app /app/*
-	reverse_proxy @panel 127.0.0.1:2095
+	reverse_proxy @panel s-ui:2095
 
 	@sub path /sub /sub/*
-	reverse_proxy @sub 127.0.0.1:2096
+	reverse_proxy @sub s-ui:2096
 }

@@ -35,8 +35,8 @@ docker compose up -d
 ## Access
 
 ```text
-Panel: http://SERVER_IP:2095/app/
-Subscription: http://SERVER_IP:2096/sub/
+Panel: reverse proxy to http://s-ui:2095/app/
+Subscription: reverse proxy to http://s-ui:2096/sub/
 Default account: admin / admin
 ```
 
@@ -55,6 +55,12 @@ Recommended layout:
 └── s-ui/
 ```
 
+Create the shared Docker network once:
+
+```bash
+docker network create proxy
+```
+
 This repository includes a Caddy template in `proxy/`:
 
 ```bash
@@ -67,10 +73,10 @@ docker compose up -d
 The template routes:
 
 ```text
-accpilot.online           -> 127.0.0.1:8080
-www.accpilot.online       -> 127.0.0.1:8080
-aa.sub2api.online/app/    -> 127.0.0.1:2095
-aa.sub2api.online/sub/    -> 127.0.0.1:2096
+accpilot.online           -> acg-faka-nginx:80
+www.accpilot.online       -> acg-faka-nginx:80
+aa.sub2api.online/app/    -> s-ui:2095
+aa.sub2api.online/sub/    -> s-ui:2096
 ```
 
 Keep AnyTLS node ports, such as `31460`, outside Cloudflare proxy mode. Use DNS-only records for node domains.
@@ -91,6 +97,12 @@ s-ui setting -show
 
 ```bash
 APP_DIR=/opt/s-ui IMAGE=ghcr.io/admin8800/s-ui CONTAINER_NAME=s-ui bash deploy.sh
+```
+
+Publish additional S-UI node ports by setting `SUI_NODE_PORTS`:
+
+```bash
+SUI_NODE_PORTS="31460:31460/tcp 31460:31460/udp 32000:32000/tcp" bash deploy.sh
 ```
 
 ## Upgrade
